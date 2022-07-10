@@ -14,16 +14,27 @@ impl Disassembler<'_> {
     pub fn disassemble_chunk(&mut self, chunk: &Chunk, name: &str) -> Result<()> {
         writeln!(self.0, "=== {name} ===")?;
 
-        let mut prev_line = u32::MAX;
-        for (index, (ins, &line)) in chunk.code.iter().zip(&chunk.lines).enumerate() {
-            if line == prev_line {
-                writeln!(self.0, "{index:0>5}    . | {ins:?}")?;
-            } else {
-                prev_line = line;
-                writeln!(self.0, "{index:0>5} {line:>4} | {ins:?}")?;
-            }
+        for i in 0..chunk.code.len() {
+            self.disassemble_ins(chunk, i)?;
         }
 
         Ok(())
+    }
+
+    pub fn disassemble_ins(&mut self, chunk: &Chunk, index: usize) -> Result<()> {
+        // Index.
+        write!(self.0, "{index:0>5} ")?;
+
+        // Line information.
+        let line = chunk.lines[index];
+        if index > 0 && line == chunk.lines[index - 1] {
+            write!(self.0, "{:>4} | ", '.')?;
+        } else {
+            write!(self.0, "{line:>4} | ")?;
+        }
+
+        // Actual instruction.
+        let ins = &chunk.code[index];
+        writeln!(self.0, "{ins:?}")
     }
 }

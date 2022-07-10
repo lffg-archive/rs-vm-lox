@@ -7,4 +7,6 @@ pub enum Ins {
     Ret,
     /// Constant.
     Const(Value),
+    /// Negation operator.
+    Neg,
 }
