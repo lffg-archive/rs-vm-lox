@@ -15,5 +15,8 @@
   "ignorePaths": [
     ".git"
   ],
-  "words": []
+  "words": [
+    "Bytecode",
+    "Tracebacks"
+  ]
 }
