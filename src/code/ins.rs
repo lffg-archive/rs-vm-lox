@@ -5,8 +5,10 @@ use crate::value::Value;
 pub enum Ins {
     /// Return.
     Ret,
-    /// Constant.
-    Const(Value),
+    /// Small constant, in which the [Value] is stored inline.
+    ///
+    /// TODO: Add `BigConst(ArenaIndex)`.
+    SmallConst(Value),
     /// Negation operator.
     Neg,
 }
