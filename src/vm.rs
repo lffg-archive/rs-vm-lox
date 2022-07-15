@@ -1,6 +1,6 @@
 use crate::{
     code::{Chunk, Ins},
-    common::Result,
+    common::{Error, Result},
     value::Value,
 };
 
@@ -23,11 +23,57 @@ impl Vm<'_> {
                 Ins::SmallConst(val) => {
                     self.push(val);
                 }
-                Ins::Neg => {
-                    let res = -self.pop().into_number().expect("type error");
-                    self.push(Value::Number(res))
-                }
+                Ins::Neg => self.un_op("unary `-`", |v| match v {
+                    Value::Number(n) => Some(Value::Number(-n)),
+                    _ => None,
+                })?,
+                Ins::Add => self.bin_op("binary `+`", |a, b| match (a, b) {
+                    (Value::Number(a), Value::Number(b)) => Some(Value::Number(a + b)),
+                    _ => None,
+                })?,
+                Ins::Sub => self.bin_op("binary `-`", |a, b| match (a, b) {
+                    (Value::Number(a), Value::Number(b)) => Some(Value::Number(a - b)),
+                    _ => None,
+                })?,
+                Ins::Mul => self.bin_op("binary `*`", |a, b| match (a, b) {
+                    (Value::Number(a), Value::Number(b)) => Some(Value::Number(a * b)),
+                    _ => None,
+                })?,
+                Ins::Div => self.bin_op("binary `/`", |a, b| match (a, b) {
+                    (Value::Number(a), Value::Number(b)) => Some(Value::Number(a / b)),
+                    _ => None,
+                })?,
             }
+        }
+    }
+
+    #[inline]
+    fn un_op(&mut self, op: &str, r#fn: impl FnOnce(Value) -> Option<Value>) -> Result<()> {
+        let v = self.pop();
+        let ty = v.type_name();
+        match r#fn(v) {
+            Some(val) => {
+                self.push(val);
+                Ok(())
+            }
+            None => Err(Error::rt(format!("Can not apply {op} over `{ty}`"))),
+        }
+    }
+
+    #[inline]
+    fn bin_op(&mut self, op: &str, r#fn: impl FnOnce(Value, Value) -> Option<Value>) -> Result<()> {
+        let b = self.pop();
+        let a = self.pop();
+        let ty_a = a.type_name();
+        let ty_b = b.type_name();
+        match r#fn(a, b) {
+            Some(val) => {
+                self.push(val);
+                Ok(())
+            }
+            None => Err(Error::rt(format!(
+                "Can not apply {op} over `{ty_a}` and `{ty_b}`"
+            ))),
         }
     }
 }

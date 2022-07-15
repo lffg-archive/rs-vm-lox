@@ -8,6 +8,12 @@ pub enum Error {
     Runtime(String),
 }
 
+impl Error {
+    pub fn rt(msg: impl Into<String>) -> Self {
+        Error::Runtime(msg.into())
+    }
+}
+
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // FIXME.

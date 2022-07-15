@@ -11,4 +11,12 @@ pub enum Ins {
     SmallConst(Value),
     /// Negation operator.
     Neg,
+    /// Binary addition.
+    Add,
+    /// Binary subtraction.
+    Sub,
+    /// Binary multiplication.
+    Mul,
+    /// Binary division.
+    Div,
 }
